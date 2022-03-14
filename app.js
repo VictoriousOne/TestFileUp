@@ -22,7 +22,10 @@ cloudinary.config({
 });
 
 
-app.use(fileUL());
+app.use(fileUL({
+    useTempFiles : true,
+    tempFileDir : '/images'
+}));
 
 //app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: true }));
@@ -52,20 +55,32 @@ app.post('/post', (req, res) => {
 
     let fileName = req.files.sampleFile;
     let path = __dirname + '/images/' + fileName.name;
-
-    const moveFile = async () => {
-        await fileName.mv(path, (err) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
-        });
-    }
+    /*
+        const moveFile = async () => {
+            await fileName.mv(path, (err) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+            });
+        }
+        
+     moveFile();
     
- moveFile();
+     */
+
+
+    fileName.mv(path, (err) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+    }); 
+
+    
     //myDelay();
-        // upload image here
-        console.log(data.image);
+    // upload image here
+    console.log(data.image);
     //cloudinary.uploader.upload(path)
     //cloudinary.uploader.upload(path, function(error, result) {console.log(result, error)})
     cloudinary.uploader.upload(path, (err, result) => {
@@ -81,7 +96,8 @@ app.post('/post', (req, res) => {
                 message: "success",
                 result,
             })
-
+            var data = res.json();
+            
             fs.unlink(path, (err, result) => {
                 if (err) {
                     throw err;
